@@ -29,38 +29,35 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request ->
-                request
-                        .requestMatchers(
-                                "/v2/api-docs",
-                                "/v3/api-docs",
-                                "/v3/api-docs/**",
-                                "/swagger-resources",
-                                "/swagger-resources/**",
-                                "/configuration/ui",
-                                "/configuration/security",
-                                "/swagger-ui/**",
-                                "/webjars/**",
-                                "/swagger-ui.html",
-                                "/api/v1/auth/**"
+        http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request -> request
+                .requestMatchers(
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/swagger-ui/**",
+                        "/webjars/**",
+                        "/swagger-ui.html",
+                        "/api/v1/auth/**"
 
+                ).permitAll()
+                .requestMatchers("/api/v1/admin").hasAuthority(Role.ADMIN.name())
+                .requestMatchers("/api/v1/user").hasAuthority(Role.USER.name())
+                .requestMatchers("/api/v1/employee/**").hasAuthority(Role.USER.name())
+                .requestMatchers("/api/v1/user/users").hasAuthority(Role.ADMIN.name())
 
-                        ).permitAll()
-                        .requestMatchers("/api/v1/admin").hasAuthority(Role.ADMIN.name())
-                        .requestMatchers("/api/v1/user").hasAuthority(Role.USER.name())
-                        .requestMatchers("/api/v1/employee/**").hasAuthority(Role.USER.name())
-                        .requestMatchers("/api/v1/user/users").hasAuthority(Role.ADMIN.name())
-
-                        .anyRequest().authenticated()
-
+                .anyRequest().authenticated()
 
         ).sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-        ).authenticationProvider(authenticationProvider()).addFilterBefore(jWtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        ).authenticationProvider(authenticationProvider()).addFilterBefore(jWtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
